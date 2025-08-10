@@ -17,7 +17,7 @@
           uses: actions/setup-java@v4
           with:
             java-version: 21
-            distribution: eclipse
+            distribution: temurin
 
         - name: Grant execute permission for gradlew
           run: chmod +x ./gradlew
