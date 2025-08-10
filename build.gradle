@@ -8,6 +8,21 @@ plugins {
 group = 'com.veroud'
 version = '1.0-SNAPSHOT'
 
+
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+ext {
+    minecraftVersion = '1.21.8'
+    gitHash = getGitHash()
+}
+
 repositories {
     mavenCentral()
     maven {
@@ -58,3 +73,28 @@ sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 
 project.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)
+
+// Task to collect this plugin's own built jar into build/libs (usually redundant because it's already there, but keeping your pattern)
+tasks.register('collect', Copy) {
+    from tasks.jar.outputs.files
+    into file('build/libs')
+}
+
+def gitBranch() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+// Example custom upload task (you must implement UploadFilesTask or replace with your own logic)
+tasks.register('uploadFiles', UploadFilesTask) {
+    version.set "${project.version}-${project.ext.gitHash}" // same here
+    snapshot.set project.version.toString().endsWith("-SNAPSHOT")
+    gitHash.set project.ext.gitHash
+    branch.set gitBranch() // you must implement gitBranch() or define it
+    inputs.files(tasks.collect.get().outputs.files)
+    dependsOn(tasks.collect)
+}
