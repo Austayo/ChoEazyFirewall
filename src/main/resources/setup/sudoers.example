@@ -1,0 +1,2 @@
+# Allow Velocity user to add IPs to ipset without password
+velocityuser ALL=(root) NOPASSWD: /usr/local/bin/choeazy_add_ip.sh
