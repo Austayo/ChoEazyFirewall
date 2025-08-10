@@ -34,4 +34,4 @@ jobs:
       run: chmod +x gradlew
     - name: Build
       run: |
-        ./gradlew cleanBuild build collect uploadFiles --no-daemon --stacktrace
+        ./gradlew cleanBuild build uploadFiles --no-daemon --stacktrace
