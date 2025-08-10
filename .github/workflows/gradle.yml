@@ -1,32 +1,37 @@
-name: Build ChoEazyFirewall
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build
 
 on:
+  workflow_dispatch: 
   push:
     branches:
-      - master
-  pull_request:
+      - '**'
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v2
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v1
       with:
-        distribution: temurin
-        java-version: 21
-
+        java-version: '21'
+    - name: Cache Gradle User Files
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle
+        key: ${{ runner.os }}-gradle-user-home
+    - name: Cache Gradle Files
+      uses: actions/cache@v4
+      with:
+        path: ./.gradle
+        key: ${{ runner.os }}-gradle-file
     - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
-
-    - name: Build plugin JAR
-      run: ./gradlew clean build
-
-    - name: Upload plugin JAR artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ChoEazyFirewall.jar
-        path: build/libs/*.jar
+      run: chmod +x gradlew
+    - name: Build
+      run: |
+        ./gradlew cleanBuild build collect uploadFiles --no-daemon --stacktrace
